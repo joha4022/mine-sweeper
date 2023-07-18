@@ -1,5 +1,5 @@
 import Timer from './Timer'
-import { Box } from './Styled.js'
+import { Box, InfoDiv } from './Styled.js'
 import { useEffect, useContext } from 'react';
 import { AppContext } from './App';
 
@@ -20,37 +20,114 @@ export default function Game() {
     }
     // store mine positions
     setMineLocation(minePositions);
+
+    for (let mine of minePositions) {
+      for (let i = 0; i < minePositions.length; i++) {
+        for (let box of document.querySelector('tbody').childNodes[i].childNodes) {
+          for (let bomb of minePositions) {
+            if (Number(box.dataset['row']) === bomb['row'] && Number(box.dataset['col']) === bomb['col']) {
+              box.mine = true;
+            }
+          }
+        }
+      }
+    }
     console.log(minePositions);
   }
 
   const mineChecker = (row, col, box) => {
-    if(box.dataset.status !== 'flagged') {
+    if (box.dataset.status !== 'flagged' && box.mine === true) {
       for (let mine of mineLocation) {
-        if (mine.row === Number(row) && mine.col === Number(col)) {
-          console.log('stepped on a mine')
-          for (let i = 0; i < mineLocation.length; i++) {
-            for (let box of document.querySelector('tbody').childNodes[i].childNodes) {
-              for (let bomb of mineLocation) {
-                if (Number(box.dataset['row']) === bomb['row'] && Number(box.dataset['col']) === bomb['col']) {
-                  box.dataset['mine'] = true;
-                }
+        console.log('stepped on a mine')
+        for (let i = 0; i < mineLocation.length; i++) {
+          for (let box of document.querySelector('tbody').childNodes[i].childNodes) {
+            for (let bomb of mineLocation) {
+              if (Number(box.dataset['row']) === bomb['row'] && Number(box.dataset['col']) === bomb['col']) {
+                box.dataset['mine'] = true;
               }
             }
           }
-        } else {
-          box.dataset.status = 'clicked'
         }
       }
+    } else if (box.dataset.status !== 'flagged' && box.mine === undefined) {
+      const previousRow = document.querySelector('tbody').childNodes[row - 2]
+      const nextRow = document.querySelector('tbody').childNodes[row]
+      let mineIndicator = 0;
+      if(Number(row) === boardSize[0] && Number(col) === boardSize[0]) {
+        if(box.nextSibling.mine === true) mineIndicator += 1; 
+        if(nextRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col].mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if(Number(row) === boardSize[0] && Number(col) === boardSize[boardSize.length-1]) {
+        if(box.previousSibling.mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(nextRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if(Number(row) === boardSize[0]) {
+        if(box.previousSibling.mine === true) mineIndicator += 1;
+        if(box.nextSibling.mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(nextRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col].mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if (Number(row) === boardSize[boardSize.length-1] && Number(col) === boardSize[0]) {
+        if(previousRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(previousRow.childNodes[col].mine === true) mineIndicator += 1;
+        if(box.nextSibling.mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if(Number(row) === boardSize[boardSize.length-1] && Number(col) === boardSize[boardSize.length-1]) {
+        if(previousRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(previousRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(box.previousSibling.mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if(Number(row) === boardSize[boardSize.length-1]) {
+        if(previousRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(previousRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(previousRow.childNodes[col].mine === true) mineIndicator += 1;
+        if(box.previousSibling.mine === true) mineIndicator += 1;
+        if(box.nextSibling.mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if(Number(col) === boardSize[0]) {
+        if(previousRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(previousRow.childNodes[col].mine === true) mineIndicator += 1;
+        if(box.nextSibling.mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col].mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else if(Number(col) === boardSize[boardSize.length-1]) {
+        if(previousRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(previousRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(box.previousSibling.mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(nextRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      } else {
+        if(previousRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(previousRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(previousRow.childNodes[col].mine === true) mineIndicator += 1;
+        if(box.previousSibling.mine === true) mineIndicator += 1;
+        if(box.nextSibling.mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col - 2].mine === true) mineIndicator += 1; 
+        if(nextRow.childNodes[col - 1].mine === true) mineIndicator += 1;
+        if(nextRow.childNodes[col].mine === true) mineIndicator += 1;
+        console.log(mineIndicator);
+      }
+      if(mineIndicator > 0) {
+        box.textContent = mineIndicator;
+        box.dataset.value = mineIndicator;
+      }
+      box.dataset.status = 'clicked';
+      mineIndicator = 0;
     }
   }
 
   const flag = (target) => {
-    if(target.dataset.status === 'hidden') {
+    if (target.dataset.status === 'hidden') {
       target.dataset.status = 'flagged';
-      document.querySelector('.mine-count').textContent --;
-    } else if(target.dataset.status === 'flagged') {
+      document.querySelector('.mine-count').textContent--;
+    } else if (target.dataset.status === 'flagged') {
       target.dataset.status = 'hidden';
-      document.querySelector('.mine-count').textContent ++;
+      document.querySelector('.mine-count').textContent++;
     }
   }
 
@@ -63,11 +140,11 @@ export default function Game() {
       <div className='header-section'>
         <h1>Minesweeper</h1>
       </div>
-      <div className='timer-section'>
+      <InfoDiv className='info-section'>
         <Timer />
-      </div>
+        <div>Mines Left: <span className='mine-count'>10</span></div>
+      </InfoDiv>
       <div className='game-section'>
-        Mines Left: <span className='mine-count'>10</span>
         <table>
           <tbody>
             {boardSize.map((row, index) => {
